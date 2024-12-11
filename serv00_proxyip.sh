@@ -1079,13 +1079,13 @@ fi
 
 showsbclash(){
 if [[ -e $WORKDIR/sing_box.json ]]; then
-green "Sing_box配置文件如下："
+green "Sing_box配置文件如下，可上传到订阅类客户端上使用："
 yellow "Argo节点的地址可自行修改优选IP"
 sleep 2
 cat $WORKDIR/sing_box.json 
 echo
 echo
-green "Clash_meta配置文件如下："
+green "Clash_meta配置文件如下，可上传到订阅类客户端上使用："
 yellow "Argo节点的地址可自行修改优选IP"
 sleep 2
 cat $WORKDIR/clash_meta.yaml
@@ -1106,7 +1106,6 @@ menu() {
    green "甬哥Blogger博客 ：ygkkk.blogspot.com"
    green "甬哥YouTube频道 ：www.youtube.com/@ygkkk"
    echo "======================================================"
-   echo 
    green  "1. 安装sing-box"
    echo   "------------------------------------------------------"
    red    "2. 卸载sing-box"
