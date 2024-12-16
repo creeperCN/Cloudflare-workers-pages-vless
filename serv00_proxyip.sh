@@ -532,6 +532,7 @@ CF节点落地到非CF网站的地区为：$IP所在地区
 二、Vmess-ws分享链接三形态如下：
 
 1、Vmess-ws主节点分享链接如下：
+(该节点如果设置为CDN回源：客户端地址可自行修改优选IP/域名，7个80系端口随便更换，被墙依旧能用！)
 $vmws_link
 
 2、Vmess-ws-tls_Argo分享链接如下： 
@@ -1103,7 +1104,7 @@ echo "$response" | while IFS='|' read -r ip status; do
 if [[ $status == "Accessible" ]]; then
 echo "$ip: 可用"  >> $WORKDIR/ip.txt
 else
-echo "$ip: 被墙 (Argo节点与proxyip依旧有效)"  >> $WORKDIR/ip.txt
+echo "$ip: 被墙 (Argo与CDN回源节点、proxyip依旧有效)"  >> $WORKDIR/ip.txt
 fi	
 done
 fi
