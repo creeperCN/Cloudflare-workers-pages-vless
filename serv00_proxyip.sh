@@ -136,6 +136,7 @@ kill_all_tasks() {
 reading "\n清理所有进程并清空所有安装内容，将退出ssh连接，确定继续清理吗？【y/n】: " choice
   case "$choice" in
     [Yy]) 
+    ps aux | grep $(whoami) | grep -v "sshd\|bash\|grep" | awk '{print $2}' | xargs -r kill -9 2>/dev/null
     killall -9 -u $(whoami)
     find ~ -type f -exec chmod 644 {} \; 2>/dev/null
     find ~ -type d -exec chmod 755 {} \; 2>/dev/null
@@ -387,6 +388,11 @@ if [ -e "$(basename ${FILE_MAP[bot]})" ]; then
 fi
 sleep 3
 rm -f "$(basename ${FILE_MAP[web]})"
+if ps aux | grep '[c]onfig' > /dev/null; then
+green "主进程已启动"
+else
+red "主进程未启动，请卸载后重装脚本" && exit
+fi
 }
 
 get_argodomain() {
