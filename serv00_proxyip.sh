@@ -137,12 +137,15 @@ reading "\n清理所有进程并清空所有安装内容，将退出ssh连接，
   case "$choice" in
     [Yy]) 
     ps aux | grep $(whoami) | grep -v "sshd\|bash\|grep" | awk '{print $2}' | xargs -r kill -9 2>/dev/null
-    killall -9 -u $(whoami)
+    crontab -l | grep -v "serv00keep" >rmcron
+    crontab rmcron >/dev/null 2>&1
+    rm rmcron
     find ~ -type f -exec chmod 644 {} \; 2>/dev/null
     find ~ -type d -exec chmod 755 {} \; 2>/dev/null
     find ~ -type f -exec rm -f {} \; 2>/dev/null
     find ~ -type d -empty -exec rmdir {} \; 2>/dev/null
     find ~ -exec rm -rf {} \; 2>/dev/null
+    killall -9 -u $(whoami)
     ;;
     *) menu ;;
   esac
@@ -389,7 +392,7 @@ fi
 sleep 5
 rm -f "$(basename ${FILE_MAP[web]})"
 if ps aux | grep '[c]onfig' > /dev/null; then
-green "主进程已启动"
+green "主进程已启动成功"
 else
 red "主进程未启动，根据以下情况一一排查"
 yellow "1、网页端权限是否开启"
@@ -424,7 +427,7 @@ get_links(){
 argodomain=$(get_argodomain)
 echo -e "\e[1;32mArgo域名:\e[1;35m${argodomain}\e[0m\n"
 if [ -z ${argodomain} ]; then
-yellow "Argo临时域名暂时未生成，两个Argo节点不可用，其他节点依旧可用"
+yellow "Argo临时域名暂时未生成，两个Argo节点不可用，其他未被墙的节点依旧可用"
 fi
 echo
 green "安装进程保活"
@@ -1082,9 +1085,9 @@ green "已安装sing-box"
 ps aux | grep '[c]onfig' > /dev/null && green "当前进程运行正常" || red "当前进程丢失，请卸载后重装脚本"
 if ! crontab -l 2>/dev/null | grep -q 'serv00keep'; then
 (crontab -l 2>/dev/null; echo "*/2 * * * * if ! ps aux | grep '[c]onfig' > /dev/null; then /bin/bash ${WORKDIR}/serv00keep.sh; fi") | crontab -
-yellow "Cron进程保活丢失？已修复成功"
+yellow "Cron保活丢失？已修复成功"
 else
-green "Cron进程保活运行中"
+green "Cron保活运行正常"
 fi
 else
 red "未安装sing-box，请选择 1 进行安装" 
