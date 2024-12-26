@@ -374,12 +374,13 @@ yellow "2、端口是否设置错误(2个TCP、1个UDP)"
 yellow "3、尝试更换网页端3个端口并重装"
 yellow "4、选择5重置"
 yellow "5、当前Serv00服务器炸了？等会再试"
+red "6、以上都试了，哥直接躺平，交给进程保活，过会再来看"
 fi
 }
 
 get_argodomain() {
   if [[ -n $ARGO_AUTH ]]; then
-    echo "$ARGO_DOMAIN"
+    echo "$ARGO_DOMAIN" > gdym.log
   else
     argodomain=$(grep -oE 'https://[[:alnum:]+\.-]+\.trycloudflare\.com' boot.log 2>/dev/null | sed 's@https://@@')
     echo "$argodomain"
@@ -1007,7 +1008,7 @@ menu() {
    green "甬哥YouTube频道 ：www.youtube.com/@ygkkk"
    green "一键三协议共存：vless-reality、Vmess-ws(Argo)、hysteria2"
    green "脚本使用视频教程：https://youtu.be/2VF9D6z2z7w"
-   green "当前脚本版本：V24.12.21 已支持进程保活"
+   green "当前脚本版本：V24.12.26 已支持主进程与argo进程各自保活"
    echo "========================================================="
    green  "1. 安装sing-box"
    echo   "---------------------------------------------------------"
@@ -1051,6 +1052,11 @@ echo
 if [[ -e $WORKDIR/list.txt ]]; then
 green "已安装sing-box"
 ps aux | grep '[c]onfig' > /dev/null && green "主进程启动正常" || red "主进程未启动，请卸载后重装脚本"
+if [ -f "$WORKDIR/boot.log" ] && grep -q "trycloudflare.com" "$WORKDIR/boot.log" 2>/dev/null; then
+green "当前Argo临时域名：$(grep -oE 'https://[[:alnum:]+\.-]+\.trycloudflare\.com' $WORKDIR/boot.log 2>/dev/null | sed 's@https://@@')"
+else
+green "当前Argo固定域名：$(cat $WORKDIR/gdym.log 2>/dev/null)"
+fi
 if ! crontab -l 2>/dev/null | grep -q 'serv00keep'; then
 if [ -f "$WORKDIR/boot.log" ] || grep -q "trycloudflare.com" "$WORKDIR/boot.log" 2>/dev/null; then
 check_process="! ps aux | grep '[c]onfig' > /dev/null || ! ps aux | grep [l]ocalhost > /dev/null"
