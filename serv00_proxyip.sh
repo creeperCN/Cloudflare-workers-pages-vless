@@ -351,12 +351,12 @@ if [ -e "$(basename ${FILE_MAP[web]})" ]; then
 fi
 
 if [ -e "$(basename ${FILE_MAP[bot]})" ]; then
+    rm -rf boot.log
     if [[ $ARGO_AUTH =~ ^[A-Z0-9a-z=]{120,250}$ ]]; then
       args="tunnel --edge-ip-version auto --no-autoupdate --protocol http2 run --token ${ARGO_AUTH}"
     elif [[ $ARGO_AUTH =~ TunnelSecret ]]; then
       args="tunnel --edge-ip-version auto --config tunnel.yml run"
     else
-      rm -rf boot.log
       args="tunnel --edge-ip-version auto --no-autoupdate --protocol http2 --logfile boot.log --loglevel info --url http://localhost:$vmess_port"
     fi
     nohup ./"$(basename ${FILE_MAP[bot]})" $args >/dev/null 2>&1 &
@@ -374,7 +374,6 @@ yellow "2、端口是否设置错误(2个TCP、1个UDP)"
 yellow "3、尝试更换网页端3个端口并重装"
 yellow "4、选择5重置"
 yellow "5、当前Serv00服务器炸了？等会再试"
-exit
 fi
 }
 
@@ -410,7 +409,12 @@ sed -i '' -e '19s|111|'"$ARGO_DOMAIN"'|' serv00keep.sh
 sed -i '' -e '20s|999|'"$ARGO_AUTH"'|' serv00keep.sh
 fi
 if ! crontab -l 2>/dev/null | grep -q 'serv00keep'; then
-(crontab -l 2>/dev/null; echo "*/2 * * * * if ! ps aux | grep '[c]onfig' > /dev/null; then /bin/bash ${WORKDIR}/serv00keep.sh; fi") | crontab -
+if [ -f "$WORKDIR/boot.log" ] || grep -q "trycloudflare.com" "$WORKDIR/boot.log" 2>/dev/null; then
+check_process="ps aux | grep '[c]onfig' > /dev/null && ps aux | grep [l]ocalhost > /dev/null"
+else
+check_process="ps aux | grep '[c]onfig' > /dev/null && ps aux | grep [t]oken > /dev/null"
+fi
+(crontab -l 2>/dev/null; echo "*/2 * * * * if ! $check_process; then /bin/bash ${WORKDIR}/serv00keep.sh; fi") | crontab -
 fi
 green "进程保活安装完毕，默认每2分钟执行一次，运行 crontab -e 可自行修改cron定时时间" && sleep 2
 ISP=$(curl -sL --max-time 5 https://speed.cloudflare.com/meta | awk -F\" '{print $26}' | sed -e 's/ /_/g' || echo "0")
@@ -962,7 +966,7 @@ rules:
   
 EOF
 sleep 2
-rm -rf boot.log config.json sb.log core tunnel.yml tunnel.json fake_useragent_0.2.0.json
+rm -rf config.json sb.log core tunnel.yml tunnel.json fake_useragent_0.2.0.json
 }
 
 showlist(){
@@ -1048,7 +1052,12 @@ if [[ -e $WORKDIR/list.txt ]]; then
 green "已安装sing-box"
 ps aux | grep '[c]onfig' > /dev/null && green "主进程启动正常" || red "主进程未启动，请卸载后重装脚本"
 if ! crontab -l 2>/dev/null | grep -q 'serv00keep'; then
-(crontab -l 2>/dev/null; echo "*/2 * * * * if ! ps aux | grep '[c]onfig' > /dev/null; then /bin/bash ${WORKDIR}/serv00keep.sh; fi") | crontab -
+if [ -f "$WORKDIR/boot.log" ] || grep -q "trycloudflare.com" "$WORKDIR/boot.log" 2>/dev/null; then
+check_process="ps aux | grep '[c]onfig' > /dev/null && ps aux | grep [l]ocalhost > /dev/null"
+else
+check_process="ps aux | grep '[c]onfig' > /dev/null && ps aux | grep [t]oken > /dev/null"
+fi
+(crontab -l 2>/dev/null; echo "*/2 * * * * if ! $check_process; then /bin/bash ${WORKDIR}/serv00keep.sh; fi") | crontab -
 yellow "Cron保活丢失？已修复成功"
 else
 green "Cron保活运行正常"
