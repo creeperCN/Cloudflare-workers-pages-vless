@@ -2,7 +2,7 @@
 # Official installation script.
 
 mcsmanager_install_path="/opt/mcsmanager"
-mcsmanager_download_addr="https://gh-deno.mocn.top/https://github.com/MCSManager/MCSManager/releases/download/v10.5.3/mcsmanager_linux_release.tar.gz"
+mcsmanager_download_addr="https://gh-proxy.com/github.com/MCSManager/MCSManager/releases/download/v10.5.3/mcsmanager_linux_release.tar.gz"
 package_name="mcsmanager_linux_release.tar.gz"
 node="v20.12.2"
 arch=$(uname -m)
