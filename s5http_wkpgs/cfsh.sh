@@ -14,8 +14,15 @@ echo "当前架构为 $arch，暂不支持" && exit
 ;;
 esac
 INIT_SYSTEM=$(cat /proc/1/comm)
+showports(){
+if [ "$INIT_SYSTEM" = "systemd" ]; then
+ports=$(ps aux | grep "$HOME/cfs5http/cfwp" 2>/dev/null | grep -v grep | sed -n 's/.*client_ip=:\([0-9]\+\).*/\1/p')
+else
+ports=$(ps w | grep "$HOME/cfs5http/cfwp" 2>/dev/null | grep -v grep | sed -n 's/.*client_ip=:\([0-9]\+\).*/\1/p')
+fi
+}
 showmenu(){
-ports=$(ps | grep "$HOME/cfs5http/cfwp" | grep -v grep | sed -n 's/.*client_ip=:\([0-9]\+\).*/\1/p')
+showports
 if [ -n "$ports" ]; then
 echo "已安装节点端口："
 echo "$ports" | while IFS= read -r port; do
@@ -124,7 +131,7 @@ else
 bash "$SCRIPT"
 echo "可将 /bin/bash $SCRIPT 手动设置开机自启"
 fi
-sleep 5 && echo "安装完毕，Socks5/Http节点已在运行中，可进入菜单选择2，查看节点配置信息及日志" 
+sleep 5 && echo "安装完毕，Socks5/Http节点已在运行中，可运行快捷方式 bash cfsh.sh 进入菜单选择2，查看节点配置信息及日志" 
 echo
 if [ "$INIT_SYSTEM" = "procd" ]; then
 until grep -q '服务端域名与端口\|客户端地址与端口\|运行中的优选IP' "$HOME/cfs5http/$port.log"; do sleep 1; done; head -n 16 "$HOME/cfs5http/$port.log" | grep '服务端域名与端口\|客户端地址与端口\|运行中的优选IP'
@@ -146,15 +153,10 @@ echo
 read -p "选择要删除的端口节点（输入端口即可）:" port
 delsystem "$port"
 pid=$(lsof -t -i :$port)
-if [ -n "$pid" ]; then
 kill -9 $pid >/dev/null 2>&1
-echo "端口 $port 的进程已被终止"
-else
-echo "端口 $port 没有占用进程"
-fi
 rm -rf "$HOME/cfs5http/$port.log" "$HOME/cfs5http/cf_$port.sh"
+echo "端口 $port 的进程已被终止"
 elif [ "$menu" = "4" ]; then
-ports=$(ps | grep "$HOME/cfs5http/cfwp" | grep -v grep | sed -n 's/.*client_ip=:\([0-9]\+\).*/\1/p')
 showmenu
 echo
 read -p "确认卸载所有节点？(y/n): " menu
